@@ -49,14 +49,20 @@ class DecodingAsyncTask extends AsyncTask<Void, Void, Throwable> {
 
     @Override
     protected Throwable doInBackground(Void... params) {
+        pdfView.closeUnclosedPDFFiles();
+        if (cancelled) {
+            return null;
+        }
         try {
             pdfDocument = docSource.createDocument(context, pdfiumCore, password);
             // We assume all the pages are the same size
             pdfiumCore.openPage(pdfDocument, firstPageIdx);
             pageWidth = pdfiumCore.getPageWidth(pdfDocument, firstPageIdx);
             pageHeight = pdfiumCore.getPageHeight(pdfDocument, firstPageIdx);
+            pdfView.closeUnclosedPDFFiles();
             return null;
         } catch (Throwable t) {
+            pdfView.closeUnclosedPDFFiles();
             return t;
         }
     }

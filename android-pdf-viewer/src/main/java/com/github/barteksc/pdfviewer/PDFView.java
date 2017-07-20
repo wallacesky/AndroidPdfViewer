@@ -89,6 +89,15 @@ public class PDFView extends RelativeLayout {
     private float midZoom = DEFAULT_MID_SCALE;
     private float maxZoom = DEFAULT_MAX_SCALE;
 
+    void closeUnclosedPDFFiles() {
+        synchronized (unclosedFiles) {
+            for (PdfDocument pdfDocument : unclosedFiles) {
+                pdfiumCore.closeDocument(pdfDocument);
+            }
+            unclosedFiles.clear();
+        }
+    }
+
     /**
      * START - scrolling in first page direction
      * END - scrolling in last page direction
@@ -513,6 +522,8 @@ public class PDFView extends RelativeLayout {
         this.onDrawAllListener = onDrawAllListener;
     }
 
+    final static List<PdfDocument> unclosedFiles = new ArrayList<>();
+
     public void recycle() {
 
         animationManager.stopAll();
@@ -534,7 +545,9 @@ public class PDFView extends RelativeLayout {
         }
 
         if (pdfiumCore != null && pdfDocument != null) {
-            pdfiumCore.closeDocument(pdfDocument);
+            synchronized (unclosedFiles) {
+                unclosedFiles.add(pdfDocument);
+            }
         }
 
         renderingHandler = null;
